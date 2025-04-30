@@ -1,3 +1,9 @@
+# This is a simple medical expert system that diagnoses common illnesses
+# based on user-reported symptoms. It uses a set of rules to determine
+# the most likely condition and provides a recommendation.
+# The system is designed to be user-friendly and interactive, asking the user   
+# for symptoms and providing a diagnosis based on the input.
+# The system is not a substitute for professional medical advice and should not be used for serious health issues.
 def rule_flu(symptoms):
     return "fever" in symptoms and "cough" in symptoms and "fatigue" in symptoms
 
