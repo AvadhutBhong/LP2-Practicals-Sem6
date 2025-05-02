@@ -1,64 +1,100 @@
-# This is a simple medical expert system that diagnoses common illnesses
-# based on user-reported symptoms. It uses a set of rules to determine
-# the most likely condition and provides a recommendation.
-# The system is designed to be user-friendly and interactive, asking the user   
-# for symptoms and providing a diagnosis based on the input.
-# The system is not a substitute for professional medical advice and should not be used for serious health issues.
-def rule_flu(symptoms):
-    return "fever" in symptoms and "cough" in symptoms and "fatigue" in symptoms
+import time
+import random
 
-def rule_covid(symptoms):
-    return "fever" in symptoms and "cough" in symptoms and "breathing_difficulty" in symptoms
+# Disease rules with required symptoms
+disease_rules = {
+    "COVID-19": {"fever", "cough", "breathing_difficulty", "loss_of_taste_smell", "fatigue"},
+    "Flu": {"fever", "cough", "fatigue", "body_ache", "headache"},
+    "Common Cold": {"cough", "sore_throat", "runny_nose", "headache"},
+    "Allergy": {"sneezing", "runny_nose", "itchy_eyes", "headache"},
+    "Dengue": {"fever", "headache", "body_ache", "rash", "nausea"},
+    "Malaria": {"fever", "chills", "sweating", "headache", "nausea"},
+}
 
-def rule_cold(symptoms):
-    return "cough" in symptoms and "fever" not in symptoms
+# Recommendations for each disease
+recommendations = {
+    "COVID-19": "Get tested and isolate yourself. Seek medical attention if symptoms worsen.",
+    "Flu": "Rest well, drink fluids, and consult a doctor if needed.",
+    "Common Cold": "Rest, stay warm, and drink plenty of fluids.",
+    "Allergy": "Avoid allergens and consider using antihistamines.",
+    "Dengue": "Consult a doctor immediately. Avoid painkillers like ibuprofen.",
+    "Malaria": "Seek medical treatment promptly. Take prescribed antimalarial medicines.",
+    "Unknown": "Symptoms unclear. Please consult a healthcare professional.",
+}
 
-def rule_unknown(symptoms):
-    return True  # fallback rule
-
-
-#Diagnosis function that uses the rules to determine the condition
-# This function will check the symptoms against the rules defined above
-# and return a diagnosis based on the rules that match the symptoms
-def diagnose(symptoms):
-    if rule_covid(symptoms):
-        return "You may have COVID-19. Get tested and isolate yourself."
-    elif rule_flu(symptoms):
-        return "You may have Flu. Please consult a doctor."
-    elif rule_cold(symptoms):
-        return "You might have a Common Cold. Rest and drink fluids."
-    else:
-        return "Symptoms unclear. Please consult a doctor."
-
-
-# Function to get symptoms from the user
-# This function will ask the user a series of questions to determine their symptoms
+# Function to get user symptoms
 def get_symptoms():
+    print("\nPlease answer the following questions (yes/no):\n")
     symptoms = []
     questions = {
-        "fever": "Do you have fever?",
-        "cough": "Do you have cough?",
-        "fatigue": "Do you feel fatigue?",
-        "breathing_difficulty": "Do you have difficulty breathing?",
-        "headache": "Do you have headache?"
+        "fever": "Do you have a fever?",
+        "cough": "Are you experiencing a cough?",
+        "fatigue": "Do you feel unusually tired or fatigued?",
+        "breathing_difficulty": "Are you having difficulty breathing?",
+        "headache": "Do you have a headache?",
+        "sore_throat": "Do you have a sore throat?",
+        "runny_nose": "Do you have a runny nose?",
+        "sneezing": "Are you sneezing frequently?",
+        "itchy_eyes": "Do you have itchy or watery eyes?",
+        "body_ache": "Are you feeling body aches?",
+        "rash": "Do you have any skin rash?",
+        "chills": "Are you experiencing chills?",
+        "sweating": "Are you sweating excessively?",
+        "nausea": "Do you feel nauseous or like vomiting?",
+        "loss_of_taste_smell": "Have you lost your sense of taste or smell?",
     }
     for symptom, question in questions.items():
-        ans = input(question + " (yes/no): ").strip().lower()
+        ans = input(f"{question} ").strip().lower()
         if ans == "yes":
             symptoms.append(symptom)
     return symptoms
 
+# Diagnosing based on matched symptoms
+def diagnose(symptoms):
+    best_match = "Unknown"
+    max_matched = 0
 
-# Main function to run the expert system
-# This function will print the title, get symptoms from the user,
-# and then call the diagnose function to get the result
-# Finally, it will print the diagnosis result to the user
+    for disease, rule_symptoms in disease_rules.items():
+        matches = set(symptoms) & rule_symptoms
+        if len(matches) > max_matched:
+            max_matched = len(matches)
+            best_match = disease
+
+    return best_match
+
+# Main system
 def main():
-    print("=== Medical Expert System ===")
+    print("=" * 60)
+    print("\033[1;92m            Welcome to the Medical Expert System\033[0m")
+    print("=" * 60)
+    time.sleep(1)
+
     symptoms = get_symptoms()
-    result = diagnose(symptoms)
-    print("\nDiagnosis Result:")
-    print(result)
+
+    print("\nAnalyzing your symptoms, please wait...")
+    time.sleep(2)
+
+    disease = diagnose(symptoms)
+
+    print("\n" + "-" * 60)
+    print(f"Diagnosis Result : {disease}")
+    print(f"Recommendation   : {recommendations.get(disease)}")
+    print("-" * 60)
+
+    # Random health tip
+    tips = [
+        "Tip: Stay hydrated and drink clean water.",
+        "Tip: Wash your hands frequently with soap.",
+        "Tip: Get enough sleep to boost your immunity.",
+        "Tip: Avoid self-medication without consulting a doctor.",
+        "Tip: Eat a balanced and nutritious diet.",
+        "Tip: Use mosquito nets to avoid diseases like dengue and malaria.",
+        "Tip: Avoid crowded places if you're feeling sick.",
+    ]
+    print(random.choice(tips))
+    print("=" * 60)
+    print("\033[1;91m 🔥 Note: This system is not a substitute for professional medical advice. 🔥\033[0m")
+    print("=" * 60)
 
 if __name__ == "__main__":
     main()
