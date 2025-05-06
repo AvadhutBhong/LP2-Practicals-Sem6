@@ -1,0 +1,41 @@
+public class ElectricityBill {
+
+    public Double units { get; set; }  // user input
+    public Double amount { get; set; } // result
+
+    // Rates Map (for viva display)
+    Map<String, Double> rates = new Map<String, Double>{
+        '0-100' => 3.36,
+        '101-300' => 7.34,
+        '301-500' => 10.37,
+        '>500' => 11.86
+    };
+
+    // Method to get rate slabs (for display in viva if asked)
+    public void showRates() {
+        System.debug('Units Slab : Rate per unit in Rs');
+        for (String slab : rates.keySet()) {
+            System.debug(slab + ' : ' + rates.get(slab));
+        }
+    }
+
+    // Method to calculate electricity bill
+    public void calculateBill() {
+        showRates();  // debug display (exam purpose)
+
+        amount = 0;  // reset before calculation
+
+        if (units > 0 && units <= 100) {
+            amount = units * rates.get('0-100');
+        } else if (units >= 101 && units <= 300) {
+            amount = 100 * rates.get('0-100') + (units - 100) * rates.get('101-300');
+        } else if (units >= 301 && units <= 500) {
+            amount = 100 * rates.get('0-100') + 200 * rates.get('101-300') + (units - 300) * rates.get('301-500');
+        } else if (units > 500) {
+            amount = 100 * rates.get('0-100') + 200 * rates.get('101-300') + 200 * rates.get('301-500') + (units - 500) * rates.get('>500');
+        } else {
+            amount = 0;
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Please enter valid units.'));
+        }
+    }
+}

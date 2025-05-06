@@ -1,0 +1,31 @@
+<apex:page controller="ElectricityBill">
+    <apex:sectionHeader title="Electricity Bill Calculator" subtitle="Calculate your bill based on units"/>
+    <apex:form >
+
+        <!-- Show Messages -->
+        <apex:pageMessages />
+
+        <apex:pageBlock title="Bill Calculator">
+
+            <!-- Units Input -->
+            <apex:pageBlockSection columns="1">
+                <apex:inputText label="Enter Units Consumed" value="{!units}" html-placeholder="e.g. 350"/>
+            </apex:pageBlockSection>
+
+            <!-- Calculate Button -->
+            <apex:pageBlockSection columns="1">
+                <apex:commandButton value="Calculate Bill" action="{!calculateBill}" reRender="result"/>
+            </apex:pageBlockSection>
+
+            <!-- Result -->
+            <apex:pageBlockSection columns="1" id="result">
+                <apex:outputPanel rendered="{!NOT(ISNULL(amount))}">
+                    <apex:outputText value="Total Bill Amount: Rs {!amount}" 
+                                     style="font-weight:bold; font-size:16px; color:green;"/>
+                </apex:outputPanel>
+            </apex:pageBlockSection>
+
+        </apex:pageBlock>
+
+    </apex:form>
+</apex:page>
