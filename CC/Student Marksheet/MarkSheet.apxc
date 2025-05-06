@@ -1,0 +1,35 @@
+public class Marksheet {
+
+    public String studentName { get; set; }
+    public Integer mathMarks { get; set; }
+    public Integer scienceMarks { get; set; }
+    public Integer englishMarks { get; set; }
+    public Integer totalMarks { get; set; }
+    public Double percentage { get; set; }
+    public String result { get; set; }
+
+    // Calculate total, percentage and pass/fail
+    public void calculateResult() {
+        if (String.isBlank(studentName)) {
+		
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Please enter student name.'));
+            return;
+        }
+
+        if (mathMarks == null || scienceMarks == null || englishMarks == null) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Please enter marks for all subjects.'));
+            return;
+        }
+
+        // Calculate total and percentage
+        totalMarks = mathMarks + scienceMarks + englishMarks;
+        percentage = (totalMarks / 300.0) * 100;
+
+        // Check result (assuming pass mark = 35 per subject)
+        if (mathMarks < 35 || scienceMarks < 35 || englishMarks < 35) {
+            result = 'Fail';
+        } else {
+            result = 'Pass';
+        }
+    }
+}

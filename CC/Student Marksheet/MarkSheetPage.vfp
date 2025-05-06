@@ -1,0 +1,43 @@
+<apex:page controller="Marksheet">
+    <apex:sectionHeader title="Student Marksheet Generator" subtitle="Practical Application"/>
+    <apex:form>
+
+        <!-- Error Messages -->
+        <apex:pageMessages />
+
+        <apex:pageBlock title="Enter Student Details">
+
+            <!-- Student Name -->
+            <apex:pageBlockSection columns="1">
+                <apex:inputText label="Student Name" value="{!studentName}" html-placeholder="Enter Student Name"/>
+            </apex:pageBlockSection>
+
+            <!-- Subject Marks -->
+            <apex:pageBlockSection title="Enter Subject Marks" columns="3">
+                <apex:inputText label="Math" value="{!mathMarks}" html-placeholder="0-100"/>
+                <apex:inputText label="Science" value="{!scienceMarks}" html-placeholder="0-100"/>
+                <apex:inputText label="English" value="{!englishMarks}" html-placeholder="0-100"/>
+            </apex:pageBlockSection>
+
+            <!-- Button -->
+            <apex:pageBlockSection columns="1">
+                <apex:commandButton value="Generate Marksheet" action="{!calculateResult}" reRender="result"/>
+            </apex:pageBlockSection>
+
+            <!-- Result -->
+            <apex:pageBlockSection title="Marksheet Result" columns="1" id="result">
+                <apex:outputPanel rendered="{!NOT(ISNULL(totalMarks))}">
+                    <apex:outputText value="Student Name: {!studentName}" style="font-size:16px; font-weight:bold;"/>
+                    <br/>
+                    <apex:outputText value="Total Marks: {!totalMarks} / 300" style="font-size:14px;"/>
+                    <br/>
+                    <apex:outputText value="Percentage: {!ROUND(percentage, 2)}%" style="font-size:14px;"/>
+                    <br/>
+                    <apex:outputText value="Result: {!result}" style="font-size:14px; color:{!IF(result='Pass','green','red')}; font-weight:bold;"/>
+                </apex:outputPanel>
+            </apex:pageBlockSection>
+
+        </apex:pageBlock>
+
+    </apex:form>
+</apex:page>
