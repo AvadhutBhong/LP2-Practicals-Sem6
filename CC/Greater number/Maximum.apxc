@@ -1,0 +1,33 @@
+public class Maximum {
+
+    public Integer num1 { get; set; }
+    public Integer num2 { get; set; }
+    public Integer num3 { get; set; }
+    public String result { get; set; }
+
+    // Method to compare and find maximum
+    public void compare() {
+        if (num1 == null || num2 == null || num3 == null) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Please enter all 3 numbers.'));
+            result = null;
+            return;
+        }
+
+        // Check if all numbers are same
+        if (num1 == num2 && num2 == num3) {
+            result = num1 + ' is the greatest. All numbers are equal.';
+        } 
+        else {
+            Integer max = num1;
+
+            if (num2 > max) {
+                max = num2;
+            }
+            if (num3 > max) {
+                max = num3;
+            }
+
+            result = max + ' is the greatest number.';
+        }
+    }
+}
