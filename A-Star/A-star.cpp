@@ -1,6 +1,6 @@
 #include<iostream>
 #include<vector>
-#include<queue> 
+#include<queue>
 #include<cmath>
 #include<algorithm>
 #include<unordered_set>
@@ -10,20 +10,20 @@ using namespace std;
 
 const int N = 3;
 
-struct PuzzleState{
+struct PuzzleState {
     int puzzle[N][N];
     int zeroRow, zeroCol;
-    int g;
-    int h;
+    int g; // cost so far
+    int h; // heuristic
 
-    bool operator<(const PuzzleState &other) const{
-        return (g+h) > (other.g +  other.h);
-    }   
+    bool operator<(const PuzzleState &other) const {
+        return (g + h) > (other.g + other.h); // min-heap for priority_queue
+    }
 };
 
-void printPuzzle(const PuzzleState &state){
-    for (int i = 0; i < N; i++){
-        for (int j = 0; j < N; j++){
+void printPuzzle(const PuzzleState &state) {
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
             cout << state.puzzle[i][j] << " ";
         }
         cout << endl;
@@ -31,68 +31,93 @@ void printPuzzle(const PuzzleState &state){
     cout << "-----\n";
 }
 
-bool isEqual(const PuzzleState &state1, const PuzzleState &state2){
-    for (int i = 0; i < N; i++){
-        for (int j = 0; j < N; j++){
-            if (state1.puzzle[i][j] != state2.puzzle[i][j])
-                return false;
-        }
-    }
+bool isEqual(const PuzzleState &a, const PuzzleState &b) {
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++)
+            if (a.puzzle[i][j] != b.puzzle[i][j]) return false;
     return true;
 }
 
-int calcManhattanDistance(const PuzzleState &state, const PuzzleState &goalState){
-    int distance = 0;
-    unordered_map<int, pair<int, int>> goalPosition;
+int calcManhattanDistance(const PuzzleState &state, const PuzzleState &goal) {
+    int dist = 0;
+    unordered_map<int, pair<int, int>> goalPos;
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++)
+            goalPos[goal.puzzle[i][j]] = {i, j};
 
-    for (int i = 0; i < N; i++){
-        for (int j = 0; j < N; j++){
-            goalPosition[goalState.puzzle[i][j]] = {i, j};
-        }
-    }
-
-    for (int i = 0; i < N; i++){
-        for (int j = 0; j < N; j++){
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++) {
             int val = state.puzzle[i][j];
-            if (val != 0){
-                auto [goalRow, goalCol] = goalPosition[val];
-                distance += abs(i - goalRow) + abs(j - goalCol);
+            if (val != 0) {
+                auto [gi, gj] = goalPos[val];
+                dist += abs(i - gi) + abs(j - gj);
             }
         }
-    }
-    return distance;
+    return dist;
 }
 
-bool isValid(int row, int col){
-    return (row >= 0 && row < N && col >= 0 && col < N);
+bool isValid(int r, int c) {
+    return r >= 0 && r < N && c >= 0 && c < N;
 }
 
-vector<PuzzleState> generateNextStates(const PuzzleState &currentState, const PuzzleState &goalState){
+vector<PuzzleState> generateNextStates(const PuzzleState &current, const PuzzleState &goal) {
     vector<PuzzleState> nextStates;
-    const int dr[] = {-1, 1, 0, 0};
-    const int dc[] = {0, 0, -1, 1};  
-    int zeroRow = currentState.zeroRow;
-    int zeroCol = currentState.zeroCol;
-    for(int i = 0; i < 4; i++){
-        int newRow = zeroRow + dr[i];
-        int newCol = zeroCol + dc[i];
-        if(isValid(newRow, newCol)){
-            PuzzleState nextState = currentState;
-            swap(nextState.puzzle[zeroRow][zeroCol], nextState.puzzle[newRow][newCol]);
-            nextState.zeroRow = newRow;
-            nextState.zeroCol = newCol;
-            nextState.g = currentState.g + 1;
-            nextState.h = calcManhattanDistance(nextState, goalState);  
-            nextStates.push_back(nextState);    
+    const int dr[] = {-1, 1, 0, 0}, dc[] = {0, 0, -1, 1};
+    int r = current.zeroRow, c = current.zeroCol;
+
+    for (int i = 0; i < 4; i++) {
+        int nr = r + dr[i], nc = c + dc[i];
+        if (isValid(nr, nc)) {
+            PuzzleState next = current;
+            swap(next.puzzle[r][c], next.puzzle[nr][nc]);
+            next.zeroRow = nr;
+            next.zeroCol = nc;
+            next.g = current.g + 1;
+            next.h = calcManhattanDistance(next, goal);
+            nextStates.push_back(next);
         }
     }
     return nextStates;
 }
 
+// New: unique string hash for each state
+string getHash(const PuzzleState &state) {
+    string key;
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++)
+            key += to_string(state.puzzle[i][j]) + ",";
+    return key;
+}
+
+bool isSolvableForBoth(const PuzzleState &initial, const PuzzleState &goal) {
+    auto countInversions = [](const PuzzleState &state) {
+        vector<int> puzzleArray;
+        for (int i = 0; i < N; i++)
+            for (int j = 0; j < N; j++)
+                puzzleArray.push_back(state.puzzle[i][j]);
+
+        int inversions = 0;
+        for (int i = 0; i < puzzleArray.size(); i++) {
+            for (int j = i + 1; j < puzzleArray.size(); j++) {
+                if (puzzleArray[i] != 0 && puzzleArray[j] != 0 && puzzleArray[i] > puzzleArray[j])
+                    inversions++;
+            }
+        }
+        return inversions;
+    };
+
+    int initialInversions = countInversions(initial);
+    int goalInversions = countInversions(goal);
+
+    // Solvable if both have same parity (both even or both odd)
+    return (initialInversions % 2) == (goalInversions % 2);
+}
+
+
 PuzzleState getPuzzleState(const string &msg, const PuzzleState &goal, bool isGoal = false) {
     PuzzleState state;
     cout << msg << " (0 = empty tile):\n";
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < N; i++)
         for (int j = 0; j < N; j++) {
             cout << "Enter value at (" << i << ", " << j << "): ";
             cin >> state.puzzle[i][j];
@@ -101,59 +126,55 @@ PuzzleState getPuzzleState(const string &msg, const PuzzleState &goal, bool isGo
                 state.zeroCol = j;
             }
         }
-    }
     state.g = 0;
-    if (isGoal) {
-        state.h = 0;
-    } else {
-        state.h = calcManhattanDistance(state, goal);
-    }
+    state.h = isGoal ? 0 : calcManhattanDistance(state, goal);
     return state;
 }
 
-void aStarSearch(const PuzzleState &initialState, const PuzzleState &goalState) {
+void aStarSearch(const PuzzleState &initial, const PuzzleState &goal) {
+    if (!isSolvableForBoth(initial, goal)) {
+        cout << "The puzzle is unsolvable (initial and goal states have different parity).\n";
+        return;
+    }
+
     priority_queue<PuzzleState> pq;
-    unordered_set<int> visited;
-    pq.push(initialState);
-    visited.insert(0); 
-        
-    while(!pq.empty()) {
+    unordered_set<string> visited;
+
+    pq.push(initial);
+    visited.insert(getHash(initial));
+
+    while (!pq.empty()) {
         PuzzleState current = pq.top();
         pq.pop();
-        
+
+        // Print the current state during search
         cout << "Current State:\n";
         printPuzzle(current);
-        
-        if (isEqual(current, goalState)) {
+
+        if (isEqual(current, goal)) {
             cout << "Goal state reached in " << current.g << " moves.\n";
             return;
         }
-        
-        vector<PuzzleState> nextStates = generateNextStates(current, goalState);
-        
-        for (const PuzzleState &nextState : nextStates) {
-            int hash = 0;
-            for (int i = 0; i < N; i++)
-                for (int j = 0; j < N; j++)
-                    hash = hash * 10 + nextState.puzzle[i][j];
-            
+
+        vector<PuzzleState> nextStates = generateNextStates(current, goal);
+        for (const PuzzleState &next : nextStates) {
+            string hash = getHash(next);
             if (visited.find(hash) == visited.end()) {
-                pq.push(nextState);
+                pq.push(next);
                 visited.insert(hash);
             }
         }
     }
+    cout << "No solution found.\n";
 }
 
 int main() {
     PuzzleState goal = getPuzzleState("Enter Goal State", PuzzleState(), true);
-    PuzzleState initial = getPuzzleState("Enter Initial State", goal, false);   
-    cout << "Initial State:\n";
-    printPuzzle(initial);   
-    cout << "Goal State:\n";
-    printPuzzle(goal);
+    PuzzleState initial = getPuzzleState("Enter Initial State", goal, false);
+
+    cout << "Initial State:\n"; printPuzzle(initial);
+    cout << "Goal State:\n"; printPuzzle(goal);
+
     aStarSearch(initial, goal);
-    cout << "A* Search completed.\n";
     return 0;
 }
-    
